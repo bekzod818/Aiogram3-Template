@@ -25,104 +25,101 @@ router = Router()
 class MyErrorHandler(ErrorHandler):
     async def handle(self, ) -> Any:
         """
-        Handler ошибок. Перехватывает почти все исключения, возникающих при работе бота.
-        :param: None
+        Exceptions handler. Catches all exceptions within task factory tasks.
+        :param dispatcher:
+        :param update:
+        :param exception:
         :return: stdout logging
         """
         if isinstance(self.exception_name, TelegramUnauthorizedError):
             """
-            Возникает исключение, когда токен бота недействителен.
+            Bot tokeni yaroqsiz bo'lsa, xatolik uyushtiriladi.
             """
             logging.info(f'Unauthorized: {self.exception_message}')
             return True
-        
+
         if isinstance(self.exception_name, TelegramNetworkError):
             """
-            Базовое исключение для всех сетевых ошибок Telegram.
+            Telegram tarmog'idagi barcha xatoliklar uchun xatolik uyushtiriladi.
             """
             logging.exception(f'NetworkError: {self.exception_message} \nUpdate: {self.update}')
             return True
-        
+
         if isinstance(self.exception_name, TelegramNotFound):
             """
-            Исключение возникает, когда чат, сообщение, пользователь и т. д. не найдены.
+            Suhbat, xabar, foydalanuvchi va boshqalar topilmasa, xatolik uyushtiriladi.
             """
             logging.exception(f'NotFound: {self.exception_message} \nUpdate: {self.update}')
             return True
-        
+
         if isinstance(self.exception_name, TelegramConflictError):
             """
-            Возникает исключение, когда токен бота уже используется другим приложением в режиме опроса.
+            Bot tokeni takroran ishlatilinayotganida xatolik uyushtiriladi.
             """
             logging.exception(f'ConflictError: {self.exception_message} \nUpdate: {self.update}')
             return True
-        
+
         if isinstance(self.exception_name, TelegramForbiddenError):
             """
-            Возникает исключение, когда бота выгоняют из чата и т. д.
+            Bot chatdan chiqarib yuborilishi kabi holatlarda xatolik uyushtiriladi.
             """
             logging.exception(f'ForbiddenError: {self.exception_message} \nUpdate: {self.update}')
             return True
-        
+
         if isinstance(self.exception_name, CallbackAnswerException):
             """
-            Исключение для обратного ответа.
+            Javob qaytmasligi kabi holatlarda xatolik uyushtiriladi.
             """
             logging.exception(f'CallbackAnswerException: {self.exception_message} \nUpdate: {self.update}')
             return True
-        
+
         if isinstance(self.exception_name, TelegramMigrateToChat):
             """
-            Возникает исключение, когда чат был перенесен в супергруппу.
+            Suhbat superguruhga ko'chirilganda xatolik uyushtiriladi.
             """
             logging.exception(f'BadRequest: {self.exception_message} \nUpdate: {self.update}')
             return True
-        
+
         if isinstance(self.exception_name, TelegramServerError):
             """
-            Возникает исключение, когда сервер Telegram возвращает ошибку 5xx.
+            Telegram serveri 5xx xatosini qaytarsa, xatolik uyushtiriladi.
             """
             logging.exception(f'BadRequest: {self.exception_message} \nUpdate: {self.update}')
             return True
-        
+
         if isinstance(self.exception_name, TelegramAPIError):
             """
-            Базовое исключение для всех ошибок Telegram API.
+            Barcha Telegram API xatoliklari uchun xatolik uyushtiriladi.
             """
             logging.exception(f'EntityTooLarge: {self.exception_message} \nUpdate: {self.update}')
             return True
-        
+
         if isinstance(self.exception_name, TelegramRetryAfter):
             """
-            Исключение возникает при превышении контроля за флудом.
+            So'rovlar ko'payib ketganda xatolik uyushtiriladi.
             """
             logging.exception(f'BadRequest: {self.exception_message} \nUpdate: {self.update}')
             return True
-        
+
         if isinstance(self.exception_name, TelegramEntityTooLarge):
             """
-            Возникает исключение, когда вы пытаетесь отправить слишком большой файл.
+            So'rov paytida ma'lumotlar limitdan oshganda xatolik uyushtiriladi.
             """
             logging.exception(f'EntityTooLarge: {self.exception_message} \nUpdate: {self.update}')
             return True
-        
+
         if isinstance(self.exception_name, TelegramBadRequest):
             """
-            Возникает исключение, когда запрос имеет неверный формат.
+            So'rov noto'g'ri formatda bo'lganda xatolik uyushtiriladi.
             """
             logging.exception(f'BadRequest: {self.exception_message} \nUpdate: {self.update}')
             return True
-        
+
         if isinstance(self.exception_name, RestartingTelegram):
             """
-            Возникает исключение при перезапуске сервера Telegram.
-
-            Похоже, что эта ошибка больше не используется Telegram, но она все еще здесь для обратной совместимости.
-            
-            В настоящее время вы должны ожидать, что Telegram может вызывать RetryAfter (с тайм-аутом 5 секунд)
-            ошибка вместо этой.
+            Telegram serverini qayta ishga tushirishda xatolik uyushtiriladi.
             """
             logging.exception(f'RestartingTelegram: {self.exception_message} \nUpdate: {self.update}')
             return True
-        
+
         logging.exception(f'Update: {self.update} \n{self.exception_name}')

@@ -16,7 +16,7 @@ def setup_middlewares(dispatcher: Dispatcher, bot: Bot) -> None:
     """MIDDLEWARE"""
     from middlewares.throttling import ThrottlingMiddleware
 
-    # Классический внутренний Middleware для защита от спама. Базовые тайминги 0.5 секунд между запросами
+    # Spamdan himoya qilish uchun klassik ichki o'rta dastur. So'rovlar orasidagi asosiy vaqtlar 0,5 soniya
     dispatcher.message.middleware(ThrottlingMiddleware(slow_mode_delay=0.5))
 
 
@@ -24,8 +24,8 @@ def setup_filters(dispatcher: Dispatcher) -> None:
     """FILTERS"""
     from filters import ChatPrivateFilter
 
-    # Классический общий Filter для определения типа чата
-    # Также фильтр можно ставить отдельно на каждый роутер в handlers/users/__init__
+    # Chat turini aniqlash uchun klassik umumiy filtr
+    # Filtrni handlers/users/__init__ -dagi har bir routerga alohida o'rnatish mumkin
     dispatcher.message.filter(ChatPrivateFilter(chat_type=["private"]))
 
 
@@ -76,12 +76,7 @@ def main():
 
     dispatcher.startup.register(aiogram_on_startup_polling)
     dispatcher.shutdown.register(aiogram_on_shutdown_polling)
-    asyncio.run(dispatcher.start_polling(bot,  # Экземпляр бота
-                                            # список типов обновлений, которые бот будет получать ['message', 'chat_member']
-                                            # при dp.resolve_used_update_types() aiogram пройдётся по роутерам и сам составит список
-                                            # allowed_updates=['message', 'chat_member'],
-                                            # закрывать сеансы бота при выключении
-                                            close_bot_session=True))
+    asyncio.run(dispatcher.start_polling(bot, close_bot_session=True))
 
 
 if __name__ == "__main__":
