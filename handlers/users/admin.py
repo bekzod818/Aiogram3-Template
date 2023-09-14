@@ -1,3 +1,4 @@
+import logging
 import asyncio
 import pandas as pd
 from aiogram import Router, types
@@ -6,11 +7,13 @@ from aiogram.fsm.context import FSMContext
 from loader import db, bot
 from keyboards.inline.buttons import are_you_sure_markup
 from states.test import AdminState
+from filters.admin import IsBotAdminFilter
+from data.config import ADMINS
 
 router = Router()
 
 
-@router.message(Command('allusers'))
+@router.message(Command('allusers'), IsBotAdminFilter(ADMINS))
 async def get_all_users(message: types.Message):
     users = await db.select_all_users()
     id = []
@@ -32,12 +35,25 @@ async def get_all_users(message: types.Message):
 
 
 @router.message(Command('reklama'))
-async def send_ad_to_users(message: types.Message):
+async def ask_ad_content(message: types.Message, state: FSMContext):
+    await message.answer("Reklama uchun post yuboring")
+    await state.set_state(AdminState.ask_ad_content)
+
+
+@router.message(AdminState.ask_ad_content)
+async def send_ad_to_users(message: types.Message, state: FSMContext):
     users = await db.select_all_users()
+    count = 0
     for user in users:
         user_id = user[-1]
-        await bot.send_message(chat_id=user_id, text="@BekoDev va @chogirmali_blog kanallariga obuna bo'ling!")
-        await asyncio.sleep(0.05)
+        try:
+            await message.send_copy(chat_id=user_id)
+            count += 1
+            await asyncio.sleep(0.05)
+        except Exception as error:
+            logging.info(f"Ad did not send to user: {user_id}. Error: {error}")
+    await message.answer(text=f"Reklama {count} ta foydalauvchiga muvaffaqiyatli yuborildi.")
+    await state.clear()
 
 
 @router.message(Command('cleandb'))
@@ -51,10 +67,10 @@ async def ask_are_you_sure(message: types.Message, state: FSMContext):
 async def clean_db(call: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     msg_id = data.get('msg_id')
-    await bot.delete_message(chat_id=call.message.chat.id, message_id=msg_id)
     if call.data == 'yes':
         await db.delete_users()
-        await call.message.answer('Baza tozalandi!')
+        text = "Baza tozalandi!"
     elif call.data == 'no':
-        await call.message.answer("Baza tozalanmadi.")
-    await state.finish()
+        text = "Baza tozalanmadi."
+    await bot.edit_message_text(text=text, chat_id=call.message.chat.id, message_id=msg_id)
+    await state.clear()

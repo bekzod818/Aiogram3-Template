@@ -1,8 +1,6 @@
 from aiogram import Router
 
-from filters import ChatPrivateFilter, IsBotAdminFilter
-
-from data.config import ADMINS
+from filters import ChatPrivateFilter
 
 
 def setup_routers() -> Router:
@@ -12,8 +10,7 @@ def setup_routers() -> Router:
     router = Router()
 
     # Agar kerak bo'lsa, o'z filteringizni o'rnating
-    # start.router.message.filter(ChatPrivateFilter(chat_type=["private"]))
-    # admin.router.message.filter(IsBotAdminFilter(user_id=ADMINS))
+    start.router.message.filter(ChatPrivateFilter(chat_type=["private"]))
 
     router.include_routers(admin.router, start.router, help.router, echo.router, error_handler.router)
 

@@ -1,15 +1,11 @@
-from typing import Union
-
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 
 
 class IsBotAdminFilter(BaseFilter):
-    def __init__(self, user_id: Union[str, list]):
-        self.user_id = user_id
+    def __init__(self, user_ids: list):
+        self.user_ids = user_ids
 
     async def __call__(self, message: Message) -> bool:
-        if isinstance(self.user_id, str):
-            return message.from_user.id == int(self.user_id)
-        elif isinstance(self.user_id, list):
-            return message.from_user.id in self.user_id
+        admin_ids_int = [int(id) for id in self.user_ids]
+        return int(message.from_user.id) in admin_ids_int
