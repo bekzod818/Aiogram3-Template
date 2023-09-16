@@ -1,3 +1,4 @@
+import aiofiles
 import logging
 import asyncio
 import pandas as pd
@@ -9,6 +10,7 @@ from keyboards.inline.buttons import are_you_sure_markup
 from states.test import AdminState
 from filters.admin import IsBotAdminFilter
 from data.config import ADMINS
+from utils.pgtoexcel import export_to_excel
 
 router = Router()
 
@@ -16,31 +18,20 @@ router = Router()
 @router.message(Command('allusers'), IsBotAdminFilter(ADMINS))
 async def get_all_users(message: types.Message):
     users = await db.select_all_users()
-    id = []
-    name = []
-    for user in users:
-        id.append(user[-1])
-        name.append(user[1])
-    data = {
-        "Telegram ID": id,
-        "Name": name
-    }
-    pd.options.display.max_rows = 10000
-    df = pd.DataFrame(data)
-    if len(df) > 50:
-        for x in range(0, len(df), 50):
-            await bot.send_message(message.chat.id, df[x:x + 50])
-    else:
-        await bot.send_message(message.chat.id, df)
+
+    file_path = f"data/users_list.xlsx"
+    await export_to_excel(data=users, headings=['ID', 'Full Name', 'Username', 'Telegram ID'], filepath=file_path)
+
+    await bot.send_document(message.chat.id, document=types.input_file.FSInputFile(file_path))
 
 
-@router.message(Command('reklama'))
+@router.message(Command('reklama'), IsBotAdminFilter(ADMINS))
 async def ask_ad_content(message: types.Message, state: FSMContext):
     await message.answer("Reklama uchun post yuboring")
     await state.set_state(AdminState.ask_ad_content)
 
 
-@router.message(AdminState.ask_ad_content)
+@router.message(AdminState.ask_ad_content, IsBotAdminFilter(ADMINS))
 async def send_ad_to_users(message: types.Message, state: FSMContext):
     users = await db.select_all_users()
     count = 0
@@ -56,14 +47,14 @@ async def send_ad_to_users(message: types.Message, state: FSMContext):
     await state.clear()
 
 
-@router.message(Command('cleandb'))
+@router.message(Command('cleandb'), IsBotAdminFilter(ADMINS))
 async def ask_are_you_sure(message: types.Message, state: FSMContext):
     msg = await message.reply("Haqiqatdan ham bazani tozalab yubormoqchimisiz?", reply_markup=are_you_sure_markup)
     await state.update_data(msg_id=msg.message_id)
     await state.set_state(AdminState.are_you_sure)
 
 
-@router.callback_query(AdminState.are_you_sure)
+@router.callback_query(AdminState.are_you_sure, IsBotAdminFilter(ADMINS))
 async def clean_db(call: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     msg_id = data.get('msg_id')
