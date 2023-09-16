@@ -77,6 +77,7 @@ def main():
     dispatcher.startup.register(aiogram_on_startup_polling)
     dispatcher.shutdown.register(aiogram_on_shutdown_polling)
     asyncio.run(dispatcher.start_polling(bot, close_bot_session=True))
+    # allowed_updates=['message', 'chat_member']
 
 
 if __name__ == "__main__":
