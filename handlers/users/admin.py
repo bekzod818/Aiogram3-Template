@@ -1,7 +1,5 @@
-import aiofiles
 import logging
 import asyncio
-import pandas as pd
 from aiogram import Router, types
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -22,7 +20,7 @@ async def get_all_users(message: types.Message):
     file_path = f"data/users_list.xlsx"
     await export_to_excel(data=users, headings=['ID', 'Full Name', 'Username', 'Telegram ID'], filepath=file_path)
 
-    await bot.send_document(message.chat.id, document=types.input_file.FSInputFile(file_path))
+    await message.answer_document(types.input_file.FSInputFile(file_path))
 
 
 @router.message(Command('reklama'), IsBotAdminFilter(ADMINS))
@@ -62,6 +60,6 @@ async def clean_db(call: types.CallbackQuery, state: FSMContext):
         await db.delete_users()
         text = "Baza tozalandi!"
     elif call.data == 'no':
-        text = "Baza tozalanmadi."
+        text = "Bekor qilindi."
     await bot.edit_message_text(text=text, chat_id=call.message.chat.id, message_id=msg_id)
     await state.clear()
