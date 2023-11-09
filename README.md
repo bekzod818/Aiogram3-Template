@@ -12,7 +12,9 @@ python3 -m venv venv && source venv/bin/activate && pip3 install -r requirements
 ```
 
 ### 2. Create .env file and copy all variables from .env_example to it and customize your self (if needed)
-
+```shell
+cp .env.example .env
+```
 ### 3. Run app.py
 Windows
 ```shell
